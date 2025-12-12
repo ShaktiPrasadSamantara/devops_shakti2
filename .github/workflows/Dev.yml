@@ -1,0 +1,33 @@
+name: Deploy Website to AWS S3
+
+# Runs when you push to main or manually trigger
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2️⃣ Configure AWS credentials (region ap-south-1)
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1   # your AWS region
+
+      # 3️⃣ Deploy/sync the website to the S3 bucket
+      - name: Sync files to S3 bucket
+        run: |
+          aws s3 sync ./ s3://shakti-website-bucket/ \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*"
